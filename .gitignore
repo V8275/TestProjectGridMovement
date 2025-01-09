@@ -1,1 +1,6 @@
 Library/
+.vs/
+Logs/
+.vscode/
+.vsconfig
+Assembly-CSharp.csproj
