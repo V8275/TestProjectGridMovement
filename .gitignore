@@ -4,3 +4,9 @@ Logs/
 .vscode/
 .vsconfig
 Assembly-CSharp.csproj
+UserSettings/
+Temp/
+obj/
+Packages/
+ProjectSettings/
+TestProjectGridMovement.sln
