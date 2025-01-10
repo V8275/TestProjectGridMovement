@@ -10,11 +10,11 @@ public class GridManager : MonoBehaviour
     [SerializeField] private float NoiseScale = 0.1f;
     [SerializeField] private string[] tags;
 
-    private int[,] obstacles;
+    private int[,] gridInt;
 
     void Start()
     {
-        obstacles = new int[gridWidth, gridHeight]; // Инициализация массива
+        gridInt = new int[gridWidth, gridHeight];
         StartCoroutine(GenerateLevel());
     }
 
@@ -35,12 +35,11 @@ public class GridManager : MonoBehaviour
                         cell.name = $"Cell_{x}_{y}";
                         cell.transform.SetParent(transform);
 
-                        // Установка 1 для препятствий, 0 для пустых клеток
                         for (int k = 0; k < tags.Length; k++)
                         {
                             if (cell.CompareTag(tags[k]))
                             {
-                                obstacles[x, y] = 1; // Препятствие
+                                gridInt[x, y] = 1;
                                 break;
                             }
                         }
@@ -48,7 +47,7 @@ public class GridManager : MonoBehaviour
                     }
                     else
                     {
-                        obstacles[x, y] = 0; // Пустая клетка
+                        gridInt[x, y] = 0;
                     }
                 }
             }
@@ -61,9 +60,8 @@ public class GridManager : MonoBehaviour
         return new Vector2Int(gridWidth, gridHeight);
     }
 
-    public int[,] GetObstacles()
+    public int[,] GetGrid()
     {
-        return obstacles;
+        return gridInt;
     }
-
 }

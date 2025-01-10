@@ -1,61 +1,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GridAStar : MonoBehaviour
+public static class GridAStar
 {
-    [SerializeField] private Vector2Int startLocation;
-    [SerializeField] private Vector2Int targetLocation;
-
-    private GridManager gridManager;
-    private int[,] obstacles;
-
-    void Start()
+    public static List<Node> FindPath(int[,] grid, Vector2Int startLocation, Vector2Int targetLocation)
     {
-        gridManager = FindObjectOfType<GridManager>();
-
-        obstacles = gridManager.GetObstacles();
-    }
-
-    private static List<Node> GetNeighbors(Node node, int[,] grid)
-    {
-        var neighbors = new List<Node>();
-        int rows = grid.GetLength(0);
-        int cols = grid.GetLength(1);
-
-        for (int x = -1; x <= 1; x++)
-        {
-            for (int y = -1; y <= 1; y++)
-            {
-                if (Mathf.Abs(x) == Mathf.Abs(y)) continue; // Skip diagonals
-
-                int newX = node.X + x;
-                int newY = node.Y + y;
-
-                if (newX >= 0 && newX < rows && newY >= 0 && newY < cols && grid[newX, newY] == 0)
-                {
-                    neighbors.Add(new Node(newX, newY));
-                }
-            }
-        }
-        return neighbors;
-    }
-
-    private static float Heuristic(Node a, Node b)
-    {
-        return Mathf.Abs(a.X - b.X) + Mathf.Abs(a.Y - b.Y); // Manhattan distance
-    }
-
-    public static List<Node> FindPath(int[,] grid, Node start, Node target)
-    {
+        Node start = new Node(startLocation.x, startLocation.y);
+        Node target = new Node(targetLocation.x, targetLocation.y);
         var openList = new List<Node> { start };
         var closedList = new HashSet<Node>();
 
         start.G = 0;
+        Debug.Log("StartG ");
         start.H = Heuristic(start, target);
 
+
+        Debug.Log("StartH ");
         while (openList.Count > 0)
         {
-            // Get the node with the lowest F cost
+            // Get node with lowest F cost
             Node currentNode = openList[0];
             foreach (var node in openList)
             {
@@ -63,7 +26,7 @@ public class GridAStar : MonoBehaviour
                     currentNode = node;
             }
 
-            // If we reached the target node, reconstruct the path
+            // Reconstruct the path
             if (currentNode.X == target.X && currentNode.Y == target.Y)
             {
                 var path = new List<Node>();
@@ -89,10 +52,7 @@ public class GridAStar : MonoBehaviour
                 {
                     openList.Add(neighbor);
                 }
-                else if (tentativeG >= neighbor.G)
-                {
-                    continue; // Not a better path
-                }
+                else if (tentativeG >= neighbor.G) continue;
 
                 neighbor.Parent = currentNode;
                 neighbor.G = tentativeG;
@@ -100,52 +60,36 @@ public class GridAStar : MonoBehaviour
             }
         }
 
-        return null; // No path found
+        return null;
     }
 
-    public void SetStartLocation(Vector2Int location)
+    private static List<Node> GetNeighbors(Node node, int[,] grid)
     {
-        startLocation = location;
-    }
+        var neighbors = new List<Node>();
+        int rows = grid.GetLength(0);
+        int cols = grid.GetLength(1);
 
-    public void SetTargetLocation(Vector2Int location)
-    {
-        targetLocation = location;
-    }
-
-    public void FindPath()
-    {
-        Node startNode = new Node(startLocation.x, startLocation.y);
-        Node targetNode = new Node(targetLocation.x, targetLocation.y);
-
-        var path = FindPath(obstacles, startNode, targetNode);
-
-        if (path != null)
+        for (int x = -1; x <= 1; x++)
         {
-            foreach (var node in path)
+            for (int y = -1; y <= 1; y++)
             {
-                // Здесь можно визуализировать путь, например, изменив цвет или добавив объект
-                Debug.Log($"Path Node: ({node.X}, {node.Y})");
-            }
+                if (Mathf.Abs(x) == Mathf.Abs(y)) continue; // Skip diagonals
 
-            foreach (var node in path)
-            {
-                // Пример изменения цвета клетки
-                GameObject cell = GameObject.Find($"Cell_{node.X}_{node.Y}");
-                if (cell != null)
+                int newX = node.X + x;
+                int newY = node.Y + y;
+
+                if (newX >= 0 && newX < rows && newY >= 0 && newY < cols && grid[newX, newY] == 0)
                 {
-                    Renderer renderer = cell.GetComponent<Renderer>();
-                    if (renderer != null)
-                    {
-                        renderer.material.color = Color.green; // Изменение цвета на зеленый
-                    }
+                    neighbors.Add(new Node(newX, newY));
                 }
             }
         }
-        else
-        {
-            Debug.Log("Path not found!");
-        }
+        return neighbors;
+    }
+     
+    private static float Heuristic(Node a, Node b)
+    {
+        return Mathf.Abs(a.X - b.X) + Mathf.Abs(a.Y - b.Y); // Manhattan distance
     }
 }
 
@@ -153,9 +97,9 @@ public class Node
 {
     public int X { get; set; }
     public int Y { get; set; }
-    public float G { get; set; } // Cost from start to this node
-    public float H { get; set; } // Heuristic cost to target
-    public float F => G + H; // Total cost
+    public float G { get; set; } 
+    public float H { get; set; } 
+    public float F => G + H; 
     public Node Parent { get; set; }
 
     public Node(int x, int y)
